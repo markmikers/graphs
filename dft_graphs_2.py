@@ -12,6 +12,7 @@ rootdir = './dft_graphs'
 
 
 equilibrium_volumes = {'Cr': [11.75, 11.41], 'Mn': [11.3725, 10.7387931], 'Fe': [11.19625, 11.35], 'Ni': [10.91, 10.91]}
+equilibrium_volumes = {'Cr': [11.75, 11.41], 'Mn': [11.3725, 10.7387931], 'Fe': [11.19625, 11.35], 'Ni': [10.91, 10.91]}
 
 def plot_emix():
     # Enthalpy of mixing
@@ -24,9 +25,13 @@ def plot_emix():
     y_gs = gs_colnames['08emix']
     x_ngs = ngs_colnames['02concentration']
     y_ngs = ngs_colnames['08emix']
-
+    x_fit = fit_concentration
+    y_fit = fit_energy
+    y_calc = calc_energy
+    x_ch = ch_concentration
+    y_ch = ch_energy
     if min(colnames['08emix']) < 0:
-        plt.axhline(y=0, xmin=0, xmax=1, linewidth=1, color='lightgray', zorder=1)
+        plt.axhline(y=0, xmin=0, xmax=1, linewidth=1, color='gray', zorder=1)
     # ch = [[0, 0, -1], [1, 0, 0]]
     #     for i in range(len(same_atomic_ratio)):
     #         for j in range(len(same_atomic_ratio[i])):
@@ -62,13 +67,29 @@ def plot_emix():
     plt.xlabel('Concentration of %s' % str(ws)[-4:-2])
     plt.ylabel('Enthalpy of mixing, eV')
     for _s, _x, _y in zip(markers, x_gs, y_gs):
-        plt.scatter(_x, _y, marker=_s, edgecolors='darkorange', s=50, zorder=3, facecolors='none')
+        plt.scatter(_x, _y, marker=_s, edgecolors='darkorange', s=50, zorder=5, facecolors='none')
     for _s, _x, _y in zip(markers, x_ngs, y_ngs):
-        plt.scatter(_x, _y, marker=_s, edgecolors='green', s=50, zorder=2, facecolors='none')
+        plt.scatter(_x, _y, marker=_s, edgecolors='green', s=50, zorder=4, facecolors='none')
+    for _x, _y in zip(x_fit, y_fit):
+        plt.scatter(_x, _y, marker='o', s=25, zorder=3, c='violet')
+    for _x, _y in zip(x_fit, y_calc):
+        plt.scatter(_x, _y, marker='x', s=25, zorder=3, c='green')
+    plt.plot(x_ch, y_ch, linestyle='--', linewidth=1, color='grey')
+
     plt.xlim(0, 1)
+    gs = mp.Patch(color='darkorange', label='GS')
+    ngs = mp.Patch(color='green', label='non-GS')
+    fm = ml.Line2D([],[],linestyle='none', marker='^', markeredgecolor='blue', markerfacecolor='none', label='FM')
+    afm = ml.Line2D([],[],linestyle='none', color='blue', marker='v', markeredgecolor='blue', markerfacecolor='none', label='AFM')
+    fim = ml.Line2D([],[],linestyle='none', color='blue', marker='D', markeredgecolor='blue', markerfacecolor='none', label='FiM')
+    nm = ml.Line2D([],[],linestyle='none', color='blue', marker='s', markeredgecolor='blue', markerfacecolor='none', label='NM')
+    pred = ml.Line2D([],[],linestyle='none', color='violet', marker='o', label='CE_ATAT')
+    fit = ml.Line2D([],[],linestyle='none', color='green', marker='x', label='CE_DFT')
+    ch = ml.Line2D([],[],linestyle='--', linewidth=1, color='grey', label="Convex hull")
+    legend = plt.legend(handles=[nm, fm, afm, fim, gs, ngs, pred, fit, ch], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     filename = '%s/%s_emix' % (rootdir, str(ws)[-6:-2])
-    # plt.savefig(filename)
-    plt.show()
+    plt.savefig(filename, bbox_extra_artists=(legend,), bbox_inches='tight')
+    # plt.show()
     plt.clf()
 
 
@@ -124,10 +145,29 @@ def plot_eform():
         plt.scatter(_x, _y, marker=_s, edgecolors='darkorange', s=50, zorder=3, facecolors='none')
     for _s, _x, _y in zip(markers, x_ngs, y_ngs):
         plt.scatter(_x, _y, marker=_s, edgecolors='green', s=50, zorder=2, facecolors='none')
+    if 'Ni' in str(ws)[-6:-2]:
+        x_ch = chf_concentration
+        y_ch = chf_energy
+        plt.plot(x_ch, y_ch, linestyle='--', linewidth=1, color='grey')
+
     plt.xlim(0, 1)
+    gs = mp.Patch(color='darkorange', label='GS')
+    ngs = mp.Patch(color='green', label='non-GS')
+    fm = ml.Line2D([],[],linestyle='none', marker='^', markeredgecolor='blue', markerfacecolor='none', label='FM')
+    afm = ml.Line2D([],[],linestyle='none', color='blue', marker='v', markeredgecolor='blue', markerfacecolor='none', label='AFM')
+    fim = ml.Line2D([],[],linestyle='none', color='blue', marker='D', markeredgecolor='blue', markerfacecolor='none', label='FiM')
+    nm = ml.Line2D([],[],linestyle='none', color='blue', marker='s', markeredgecolor='blue', markerfacecolor='none', label='NM')
+    if 'Ni' in str(ws)[-6:-2]:
+        chf = ml.Line2D([], [], linestyle='--', linewidth=1, color='grey', label="Convex hull")
+
+    if 'Ni' in str(ws)[-6:-2]:
+        legend = plt.legend(handles=[nm, fm, afm, fim, gs, ngs, chf], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    else:
+        legend = plt.legend(handles=[nm, fm, afm, fim, gs, ngs], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
     filename = '%s/%s_eform' % (rootdir, str(ws)[-6:-2])
-    # plt.savefig(filename)
-    plt.show()
+    plt.savefig(filename, bbox_extra_artists=(legend,), bbox_inches='tight')
+    # plt.show()
     plt.clf()
 
 
@@ -268,6 +308,8 @@ def plot_mmavg_and_mmsortavg():
 
 for ws in wb.get_sheet_names():
     ws = wb[ws]
+    if not('FeNi' in str(ws)):
+        continue
     N = ws['Q1'].value
     colnames = {'01names': [], '02concentration': [], '03nat_total': [], '04nat_1': [], '05nat_2': [], '06v/at': [],
                 '07etotal': [], '08emix': [], '09eform': [], '10mmtotal': [], '11mmavg': [],
@@ -289,7 +331,15 @@ for ws in wb.get_sheet_names():
     border_colors = []
     markers = []
     concentrations = []
-    for ms in colnames['16ms_g']:
+    if 'Fe' in str(ws)[-6:-2]:
+        index = str(ws)[-6:-2].index('Fe')
+        if index == 0:
+            mses = colnames['14ms_1']
+        elif index == 2:
+            mses = colnames['15ms_2']
+    else:
+        mses = colnames['16ms_g']
+    for ms in mses:
         if ms == 'NM':
             markers.append('s')
         elif ms == 'FM':
@@ -343,6 +393,53 @@ for ws in wb.get_sheet_names():
         for k in gs:
             del ngs_colnames[i][k]
 
+    ### cluster expansion
+    # print str(ws)
+    fit_socket = open('./binariesCE/%s%sfccCE/fit.out' % (str(ws)[-6], str(ws)[-4]), 'rb')
+    fit = [x.split(' ') for x in fit_socket.read().rstrip().split('\n')]
+    fit_socket.close()
+    for i in range(len(fit)):
+        fit[i][-1] = int(fit[i][-1])
+    # print fit
+    fit.sort(key=lambda x: x[0])
+    fit.pop(-1)
+    fit.pop(0)
+    # print fit
+    fit_concentration = [float(x[0]) for x in fit]
+    fit_energy = [float(x[2]) for x in fit]
+    fit.sort(key=lambda x: x[-1])
+    # for i in fit:
+    #     print i
+    if len(fit) > 29:
+        for i in range(28):
+            fit.pop(0)
+    # for i in fit:
+    #     print i
+    calc_energy = [float(x[1]) for x in fit]
+    # break
+
+    ### convex hull
+    ch_socket = open('./binariesCE/%s%sfccCE/gs.out' % (str(ws)[-6], str(ws)[-4]), 'rb')
+    ch = [x.split(' ') for x in ch_socket.read().rstrip().split('\n')]
+    ch_socket.close()
+    if ('FeMn' in str(ws)[-6:-2]) or ('FeNi' in str(ws)[-6:-2]) or ('MnNi' in str(ws)[-6:-2]):
+        ch_concentration = [float(x[0]) for x in ch]
+    else:
+        ch_concentration = [1-float(x[0]) for x in ch]
+    ch_energy = [float(x[1]) for x in ch]
+
+    if 'Ni' in str(ws)[-6:-2]:
+        chf_socket = open('./binariesCE/%s%sfccCE/gs_form.out' % (str(ws)[-6], str(ws)[-4]), 'rb')
+        chf = [x.split(' ') for x in chf_socket.read().rstrip().split('\n')]
+        chf_socket.close()
+        chf_concentration = [float(x[0]) for x in chf]
+        chf_energy = [float(x[1]) for x in chf]
+
+
+
+
+    # print fit_concentration
+    # print fit_energy
     # print gs_colnames
     # print ngs_colnames
     # break
@@ -351,12 +448,12 @@ for ws in wb.get_sheet_names():
     #         border_colors.append('blue')
     #     else:
     #         border_colors.append('green')
-    # plot_emix()
-    plot_eform()
-    # plot_volume() #ok
+    # plot_emix() #ok
+    # plot_eform() #ok
+    plot_volume() #ok
     # break
     # plot_mmavg() #ok
     # print ws
     # plot_mmsortavg() #ok
     # plot_mmavg_and_mmsortavg() #not useful
-    break
+    # break
